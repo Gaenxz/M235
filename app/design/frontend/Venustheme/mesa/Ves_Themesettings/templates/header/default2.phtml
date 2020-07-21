@@ -1,0 +1,148 @@
+<?php
+$ves = $this->helper('Ves\Themesettings\Helper\Theme');
+$sticky = $ves->getHeaderCfg("sticky_settings/sticky");
+$sticky_type = $ves->getHeaderCfg("sticky_settings/sticky_type");
+$logo = $ves->getHeaderCfg("sticky_settings/logo");
+$menu = $ves->getHeaderCfg("sticky_settings/menu");
+$search = $ves->getHeaderCfg("sticky_settings/search");
+$custom_block = $ves->getHeaderCfg("sticky_settings/custom_block");
+$topcart = $ves->getHeaderCfg("sticky_settings/topcart");
+$topbar = $ves->getHeaderCfg("sticky_settings/topbar");
+$enable_toplinks = $ves->getHeaderCfg("toplinks_settings/enable");
+$show_search = $ves->getHeaderCfg("search_settings/search");
+$show_topbar = $ves->getHeaderCfg("topbar/show_topbar");
+
+
+if($sticky_type == 'all'){
+	$logo = $menu = $search = $topcart = $toplinks = $topbar= true;	
+} 
+?>
+<div id="ves-header" class="header2">
+	<!-- Top bar -->
+	<?php if($show_topbar): ?>
+		<div class="panel page-topbar clearfix <?php echo $topbar?"sticky-item":"sticky-item-hidden"  ?>">
+			<div class="container">
+				<div class="ves-inner">
+					<div class="setting-wrapper pull-left hidden-xs hidden-sm">
+						<?php echo $this->getChildHtml('setting_links2') ?>
+					</div>
+					<div class="block-header hidden-sm hidden-xs pull-right">
+						<?php $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+							$customerSession = $objectManager->get('Magento\Customer\Model\Session');
+							if($customerSession->isLoggedIn()) {
+							    echo $block->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('mesa-text-welcome')->toHtml();
+							}
+							else{
+								echo $block->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('mesa-block-header2')->toHtml();
+							}
+						?>
+					</div>
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+	
+	<!-- header content -->
+	<div class="header-content clearfix">
+		<div class="container">
+			<div class="ves-inner">
+				<div class="row no-margin">
+				<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 no-padding">
+					<div class="header-logo">
+						<div class="logo-wrapper <?php echo $logo?"sticky-item":"sticky-item-hidden"  ?>">
+							<?php echo $this->getChildHtml('logo') ?>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding">
+					<?php if($show_search): ?>
+						<div class="search-wrapper ves-autosearch">
+							<div class="dropdown-toggle hidden-md hidden-lg" data-toggle="dropdown">
+								<i class="fa fa-search">&nbsp;</i>
+							</div>
+							<div class="search-content" role="menu">
+								<?php echo $this->getChildHtml('ves_autosearch') ?>
+							</div> 
+						</div>
+					<?php endif; ?>
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 no-padding">
+					<div class="pull-right user-block">
+						<div class="minicart-warp <?php echo $topcart?"sticky-item":"sticky-item-hidden"  ?>"><?php echo $this->getChildHtml('minicart') ?></div>
+					</div>
+				</div>
+				</div>
+				<?php if($custom_block = $this->getChildHtml("custom_block")): ?>
+				<div class="customblock-wrapper <?php echo $custom_block?"sticky-item":"sticky-item-hidden"  ?>">
+					<?php echo $custom_block; ?>
+				</div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+	<div class="header-bottom">
+		<div class="container">
+			<div class="ves-inner">
+				<div class="row">
+					<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 hidden-sm hidden-xs">
+						<div class="vertical-menu">
+							<?php echo $block->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('mesa-vertical-menu')->toHtml();?>
+						</div>
+					</div>
+					<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+						<!-- Menu top -->
+						<div class="ves-menutop clearfix <?php echo $menu?"sticky-item":"sticky-item-hidden" ?>">
+							<div class="ves-inner">
+								<?php echo $this->getChildHtml('catalog.topnav') ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php if($sticky){ ?>
+	<script type="text/javascript">
+		require([
+			'jquery',
+			'vestheme'
+			], function(){
+				
+				function getScroll () {
+				    var b = document.body;
+				    var e = document.documentElement;
+				    return {
+				        left: parseFloat( window.pageXOffset || b.scrollLeft || e.scrollLeft ),
+				        top: parseFloat( window.pageYOffset || b.scrollTop || e.scrollTop )
+				    };
+				}
+				jQuery(document).ready(function($) {
+					var h = jQuery('.page-header').height();
+					var myHeader = jQuery('.page-header');
+					myHeader.data( 'position', myHeader.position() );
+
+					jQuery(window).scroll(function(){
+						var hPos = myHeader.data('position'), scroll = getScroll();
+						var h_px = jQuery("#ves-header", ".page-header").outerHeight(true)+"px";
+
+						if ( hPos.top < scroll.top) {
+							jQuery('.page-header').delay(1000).addClass("navbar-fixed-top");
+							jQuery('body').delay(1000).addClass("keep-header");
+							var headerHeight = jQuery('.page-header').height();
+							<?php if($sticky_type == 'specify'){ ?>jQuery(".page-wrapper").css({"padding-top":headerHeight+"px"});<?php } ?>
+							jQuery(".sticky-item-hidden").css({"display":"none"});
+							jQuery("#maincontent").delay(1000).css("margin-top", h_px);
+						}else{
+							jQuery(".sticky-item-hidden").css({"display":""});
+							jQuery('.page-header').delay(1000).removeClass("navbar-fixed-top");
+							jQuery('body').delay(1000).removeClass("keep-header");
+							jQuery(".page-wrapper").css({"padding-top":""});
+							jQuery("#maincontent").delay(1000).css({"margin-top": ""});
+						}
+					});
+				});
+			});
+	</script>
+	<?php } ?>
+	<?php echo $this->getChildHtml('ves_navigation'); ?>
+</div>
